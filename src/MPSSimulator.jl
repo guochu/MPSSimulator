@@ -1,6 +1,7 @@
 module MPSSimulator
 
 using LinearAlgebra, TensorOperations
+import LinearAlgebra
 
 using QuantumCircuits, QuantumCircuits.Gates
 using QuantumCircuits: ordered_positions, ordered_op
@@ -33,6 +34,7 @@ include("measure.jl")
 include("expecs.jl")
 
 # differentiation
+include("diff/util.jl")
 include("diff/circuitdiff.jl")
 include("diff/expecdiff.jl")
 

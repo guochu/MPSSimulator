@@ -10,11 +10,16 @@ end
 
 function _qterm_expec_util(m::QubitsTerm, state::AbstractMPS; trunc::TruncationScheme=DefaultMPSTruncation)
 	return expectation(m, state), z -> begin
-		state_a = copy(state)
-		state_b = copy(state)
-		apply!(conj(z) * m, state_a; trunc=trunc)
-		apply!(z * m', state_b; trunc=trunc)
-		r = state_a + state_b
+		if ishermitian(m)
+			r = copy(state)
+			apply!((2 * real(z)) * m, r; trunc=trunc)
+		else
+			state_a = copy(state)
+			state_b = copy(state)
+			apply!(conj(z) * m, state_a; trunc=trunc)
+			apply!(z * m', state_b; trunc=trunc)
+			r = state_a + state_b
+		end
 		canonicalize!(r, normalize=false, trunc=trunc)
 		return (nothing, r)
 	end 
