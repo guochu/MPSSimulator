@@ -1,14 +1,14 @@
 # gradient of expectation values
 
 
-function apply!(m::QubitsTerm, state::AbstractMPS; trunc::TruncationScheme=DefaultMPSTruncation)
+function apply!(m::QubitsTerm, state::MPS; trunc::TruncationScheme=DefaultMPSTruncation)
 	errs = [QuantumSpins._apply_impl((k,), Array(v), state, trunc) for (k, v) in zip(QuantumCircuits.positions(m), oplist(m))]
 	state[1] *= QuantumCircuits.coeff(m)
 	return errs
 end
 
 
-function _qterm_expec_util(m::QubitsTerm, state::AbstractMPS; trunc::TruncationScheme=DefaultMPSTruncation)
+function _qterm_expec_util(m::QubitsTerm, state::MPS; trunc::TruncationScheme=DefaultMPSTruncation)
 	return expectation(m, state), z -> begin
 		if ishermitian(m)
 			r = copy(state)
@@ -25,7 +25,7 @@ function _qterm_expec_util(m::QubitsTerm, state::AbstractMPS; trunc::TruncationS
 	end 
 end
 
-@adjoint expectation(m::QubitsTerm, state::AbstractMPS) = _qterm_expec_util(m, state)
+@adjoint expectation(m::QubitsTerm, state::MPS) = _qterm_expec_util(m, state)
 
 # function _qop_expec_util(m::QubitsOperator, state::AbstractMPS)
 # 	return expectation(m, state), z -> begin
