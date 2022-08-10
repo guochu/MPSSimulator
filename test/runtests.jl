@@ -66,12 +66,30 @@ function simple_phase_estimation_2(L::Int, auto_reset::Bool=false)
 	return (phi == phi_out) && (j[1:L] == res[1:L])
 end
 
+function dm_phase_estimation_1(L::Int, auto_reset::Bool=false)
+	j = rand(0:1, L)
+	state = densitymatrix_mps(L+1)
+	phi = to_digits(j)
+	circuit = phase_estimate_circuit(j)
+	apply!(circuit, state)
+
+	res = Int[]
+	for i = 1:(L+1)
+		i, p = measure!(state, i, auto_reset=auto_reset)
+		push!(res, i)
+	end
+	phi_out = to_digits(res)
+	return (phi == phi_out) && (j[1:L] == res[1:L])
+end
+
 @testset "test quantum phase estimation algorithm" begin
 	for L in [5, 6]
 		@test simple_phase_estimation_1(L, false)
 		@test simple_phase_estimation_1(L, true)
 		@test simple_phase_estimation_2(L, false)
 		@test simple_phase_estimation_2(L, true)
+
+		@test dm_phase_estimation_1(L, true)
 	end
 end
 

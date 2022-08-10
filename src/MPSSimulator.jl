@@ -14,6 +14,7 @@ using Zygote: @adjoint
 
 
 export apply, apply!, measure!, amplitude, statevector_mps, qubit_encoding_mps, fuse_gates
+export densitymatrix, densitymatrix_mps
 export expectation
 export QFT
 
@@ -23,6 +24,8 @@ const DefaultMPSTruncation = MPSTruncation(D=1000, ϵ=1.0e-6)
 
 
 include("initializers.jl")
+
+include("densitymatrix.jl")
 
 include("apply_gates.jl")
 

@@ -36,4 +36,27 @@ function expectation(psiA::MPS, h::QubitsOperator, psiB::MPS)
 end
 
 
+# density operator
+"""
+	expectation(m::QubitsTerm, psi::DensityOperatorMPS) 
+	⟨I|h|ρ⟩
+"""
+function expectation(m::QubitsTerm, psi::DensityOperatorMPS, envs=environments(psi))
+	sm = QubitsTerm(QuantumCircuits.positions(m), [QuantumSpins.rkron(a, one(a)) for a in oplist(m)], QuantumCircuits.coeff(m))
+	return expectation(psi.I, sm, psi.data, envs)
+end
+
+function expectation(h::QubitsOperator, psi::DensityOperatorMPS)
+	(length(h) <= length(psi)) || throw(DimensionMismatch())
+	envs = environments(psi, psi)
+	r = zero(scalar_type(psi))
+	for (k, v) in h.data
+		for (x, c) in v
+			m = QubitsTerm(k, x, c)
+			r += expectation(m, psi, envs)
+		end
+	end
+	return r
+end
+
 
