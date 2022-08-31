@@ -1,5 +1,5 @@
 
-function check_mps_ham_expec_grad(::Type{T}, L::Int) where {T<:Number}
+function check_mps_qterm_expec_grad_a(::Type{T}, L::Int) where {T<:Number}
 	v0 = randn(L)
 	v = randn(L)
 	target_state = qubit_encoding_mps(T, v0)
@@ -10,6 +10,43 @@ function check_mps_ham_expec_grad(::Type{T}, L::Int) where {T<:Number}
 	grad2 = fdm_gradient(loss, v)
 	return maximum(abs.(grad1 - grad2)) < 1.0e-6
 end
+
+function check_mps_qterm_expec_grad_b(::Type{T}, L::Int) where {T<:Number}
+	v0 = randn(L)
+	v = randn(L)
+	target_state = qubit_encoding_mps(T, v0)
+	observer = QubitsTerm(1=>"+", 3=>"-", coeff=0.7)
+	loss(x) = real(expectation(observer, qubit_encoding_mps(T, x)))
+
+	grad1 = gradient(loss, v)[1]
+	grad2 = fdm_gradient(loss, v)
+	return maximum(abs.(grad1 - grad2)) < 1.0e-6
+end
+
+function check_mps_ham_expec_grad_a(::Type{T}, L::Int) where {T<:Number}
+	v0 = randn(L)
+	v = randn(L)
+	target_state = qubit_encoding_mps(T, v0)
+	observer = QubitsTerm(1=>"Z", 3=>"Z", coeff=0.37) + QubitsTerm(1=>"X", coeff=0.7)
+	loss(x) = real(expectation(observer, qubit_encoding_mps(T, x)))
+
+	grad1 = gradient(loss, v)[1]
+	grad2 = fdm_gradient(loss, v)
+	return maximum(abs.(grad1 - grad2)) < 1.0e-6
+end
+
+function check_mps_ham_expec_grad_b(::Type{T}, L::Int) where {T<:Number}
+	v0 = randn(L)
+	v = randn(L)
+	target_state = qubit_encoding_mps(T, v0)
+	observer = QubitsTerm(1=>"Z", 3=>"Z", coeff=0.37) + QubitsTerm(1=>"+", 2=>"-", coeff=0.7)
+	loss(x) = real(expectation(observer, qubit_encoding_mps(T, x)))
+
+	grad1 = gradient(loss, v)[1]
+	grad2 = fdm_gradient(loss, v)
+	return maximum(abs.(grad1 - grad2)) < 1.0e-6
+end
+
 
 
 function circuit_grad(L::Int, depth::Int)
@@ -30,8 +67,14 @@ end
 
 @testset "gradient of quantum operator expectation value" begin
 	for L in 3:6
-		@test check_mps_ham_expec_grad(Float64, L)
-		@test check_mps_ham_expec_grad(ComplexF64, L)
+		@test check_mps_qterm_expec_grad_a(Float64, L)
+		@test check_mps_qterm_expec_grad_a(ComplexF64, L)
+		@test check_mps_qterm_expec_grad_b(Float64, L)
+		@test check_mps_qterm_expec_grad_b(ComplexF64, L)
+		@test check_mps_ham_expec_grad_a(Float64, L)
+		@test check_mps_ham_expec_grad_a(ComplexF64, L)
+		@test check_mps_ham_expec_grad_b(Float64, L)
+		@test check_mps_ham_expec_grad_b(ComplexF64, L)
 	end
 end
 

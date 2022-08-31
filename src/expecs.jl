@@ -20,10 +20,10 @@ function expectation(psiA::MPS, m::QubitsTerm, psiB::MPS, envs::OverlapCache=env
 	return QuantumSpins.scalar(hold) * QuantumCircuits.coeff(m)
 end
 
-expectation(m::QubitsTerm, psi::MPS, envs::OverlapCache=environments(psi, psi)) = expectation(psi, m, psi, envs)
+expectation(m::QubitsTerm, psi::MPS, envs::OverlapCache=environments(psi, psi); kwargs...) = expectation(psi, m, psi, envs)
 
 function expectation(psiA::MPS, h::QubitsOperator, psiB::MPS)
-	(length(h) <= length(psiA)) || throw(DimensionMismatch())
+	(QuantumCircuits.get_largest_pos(h) <= length(psiA)) || throw(DimensionMismatch())
 	envs = environments(psiA, psiB)
 	r = zero(promote_type(scalar_type(psiA), scalar_type(psiB)))
 	for (k, v) in h.data
@@ -34,6 +34,8 @@ function expectation(psiA::MPS, h::QubitsOperator, psiB::MPS)
 	end
 	return r
 end
+
+expectation(h::QubitsOperator, psi::MPS; kwargs...) = expectation(psi, h, psi)
 
 
 # density operator
