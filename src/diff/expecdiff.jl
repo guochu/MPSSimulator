@@ -29,10 +29,10 @@ function _qterm_expec_util(m::QubitsTerm, state::MPS; trunc::TruncationScheme=De
 	end 
 end
 
-function _qop_expec_util(m::QubitsOperator, state::MPS; trunc::TruncationScheme=DefaultMPSTruncation)
+function _qop_expec_util(m::QubitsOperator, state::MPS; ishermitian::Union{Bool, Nothing}=nothing, trunc::TruncationScheme=DefaultMPSTruncation)
 	return expectation(m, state), z -> begin
 		alg = StableArith(D=trunc.D, ϵ=trunc.ϵ)
-		_is_herm = ishermitian(m)
+		_is_herm = isnothing(ishermitian) ? LinearAlgebra.ishermitian(m) : ishermitian
 		mpo = _MPO(length(state), m)
 		if _is_herm
 			mpsout, err = mpompsmult(mpo, state, alg)
