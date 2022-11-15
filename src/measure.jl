@@ -76,7 +76,7 @@ end
 
 function measure_and_throw(s::QMeasure, state::AbstractMPS; trunc::TruncationScheme=DefaultMPSTruncation)
 	if QuantumSpins.svectors_uninitialized(state)
-	    canonicalize!(state, normalize=false, alg=SVDFact(trunc=trunc))
+	    canonicalize!(state, normalize=false, trunc=trunc)
 	end
 	mpsout, si, probability = _measure_one_site(state, s.position, QuantumSpins._eye(2))
 	return mpsout, si, probability
@@ -152,7 +152,7 @@ function apply!(s::QMeasure, state::DensityOperatorMPS; trunc::TruncationScheme=
 		# projection to this state
 		apply!(gate(pos, op), state, trunc=trunc)
 		# println("trace is $(tr(state))")
-		canonicalize!(state, normalize=false, alg=SVDFact(trunc=trunc))
+		canonicalize!(state, normalize=false, trunc=trunc)
 		if s.auto_reset && (outcome == 1)
 			# op = Gates.DOWN
 			apply!(XGate(pos), state, trunc=trunc)

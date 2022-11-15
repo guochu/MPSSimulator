@@ -15,7 +15,7 @@ function _qterm_expec_util(m::QubitsTerm, state::MPS; trunc::TruncationScheme=De
 		if ishermitian(m)
 			r = copy(state)
 			apply!((2 * real(z)) * m, r; trunc=trunc)
-			canonicalize!(r, normalize=false, alg=SVDFact(trunc=trunc))
+			canonicalize!(r, normalize=false, trunc=trunc)
 		else
 			state_a = copy(state)
 			state_b = copy(state)
@@ -65,7 +65,7 @@ function _qterms(x::QubitsOperator)
 	return r
 end
 
-function _MPO(L::Int, h::QubitsOperator; alg::MPOCompression=Deparallelise())
+function _MPO(L::Int, h::QubitsOperator; alg::AbstractCompression=Deparallelise())
 	physpaces = [2 for i in 1:L]
 	local mpo
 	compress_threshold = 20
