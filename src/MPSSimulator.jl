@@ -9,6 +9,7 @@ using QuantumSpins
 using QuantumSpins: updateright, updateleft, OverlapCache
 import QuantumSpins
 import QuantumSpins: apply!,expectation, _is_commutative, commutative_blocks, fuse_gates
+const QS = QuantumSpins
 
 using Zygote
 using Zygote: @adjoint

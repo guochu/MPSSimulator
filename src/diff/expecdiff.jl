@@ -15,7 +15,7 @@ function _qterm_expec_util(m::QubitsTerm, state::MPS; trunc::TruncationScheme=De
 		if ishermitian(m)
 			r = copy(state)
 			apply!((2 * real(z)) * m, r; trunc=trunc)
-			canonicalize!(r, normalize=false, trunc=trunc)
+			canonicalize!(r, alg = alg=Orthogonalize(QS.SVD(), trunc, normalize=false))
 		else
 			state_a = copy(state)
 			state_b = copy(state)

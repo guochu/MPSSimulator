@@ -37,7 +37,7 @@ end
 
 
 function back_propagate(Δ::AbstractMPS, circuit::QCircuit, y::AbstractMPS; kwargs...)
-    RT = real(scalar_type(y))
+    RT = real(eltype(y))
     grads = Vector{RT}[]
     for item in reverse(circuit)
         Δ, ∇θs, y = back_propagate(Δ, item, y; kwargs...)

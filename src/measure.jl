@@ -45,18 +45,16 @@ function _measure_one_site(mps::AbstractMPS, site::Int, basis::AbstractMatrix)
 	s = l[si]
 	m = m / sqrt(s)
 	if L==1
-		length(m)==1 || error("somthing went wrong in measurement.")
+		length(m)==1 || error("somthing went wrong in measurement")
 		return nothing, si, s
 	end
-	mpsout = typeof(mps)(L-1)
+	mpsout = typeof(mps.data)(undef, L-1)
 	if site==1
 		mpsj = contract(m, mps[2], ((2,), (1,)))
 		mpsout[site] = mpsj
 		for i = (site+1):(L-1)
 			mpsout[i] = mps[i+1]
 		end
-		QuantumSpins.maybe_init_boundary_s!(mpsout)
-		mpsout.s[2:end] = mps.s[3:end]
 	else
 		mpsj = contract(mps[site-1], m, ((3,), (1,)))
 		for i=1:(site-2)
@@ -66,17 +64,16 @@ function _measure_one_site(mps::AbstractMPS, site::Int, basis::AbstractMatrix)
 		for i = site:(L-1)
 			mpsout[i] = mps[i+1]
 		end
-		QuantumSpins.maybe_init_boundary_s!(mpsout)
-		mpsout.s[2:(site-1)] = mps.s[2:(site-1)]
-		mpsout.s[site:end] = mps.s[(site+1):end]
 	end
+	mpsout = MPS(mpsout)
+	canonicalize!(mpsout, alg=Orthogonalize(QS.SVD(), normalize=false))
 	return mpsout, si, s
 end
 
 
 function measure_and_throw(s::QMeasure, state::AbstractMPS; trunc::TruncationScheme=DefaultMPSTruncation)
 	if QuantumSpins.svectors_uninitialized(state)
-	    canonicalize!(state, normalize=false, trunc=trunc)
+	    canonicalize!(state, alg = Orthogonalize(QS.SVD(), trunc, normalize=false))
 	end
 	mpsout, si, probability = _measure_one_site(state, s.position, QuantumSpins._eye(2))
 	return mpsout, si, probability
@@ -104,7 +101,7 @@ function apply!(s::QMeasure, state::MPS; trunc::TruncationScheme=DefaultMPSTrunc
 		state[pos] = permute(contract(op, state[pos], ((2,), (2,))), (2,1,3))
 		state[pos] /= sqrt(probability)
 		# it is really necessary to prepare ? it seems to be...
-		canonicalize!(state, normalize=false)
+		canonicalize!(state, alg = Orthogonalize(QS.SVD(), normalize=false))
 	else
 		mpsout, si, probability = measure_and_throw(s, state, trunc=trunc)
 		if isnothing(mpsout)
@@ -115,7 +112,9 @@ function apply!(s::QMeasure, state::MPS; trunc::TruncationScheme=DefaultMPSTrunc
 			pop!(QuantumSpins.raw_singular_matrices(state))
 			for i = 1:length(mpsout)
 			    state[i] = mpsout[i]
-			    state.s[:] = mpsout.s[:]
+			end
+			for i in 2:length(mpsout)
+				state.s[i] = mpsout.s[i]
 			end
 		end
 	end
@@ -130,7 +129,7 @@ function amplitude(s::MPS, basis::Vector{Int}; scaling::Real=sqrt(2))
 	for item in basis
 	    (item==0 || item==1) || throw(ArgumentError("the qubit should either be 0 or 1."))
 	end
-	ps = statevector_mps(scalar_type(s), basis)
+	ps = statevector_mps(eltype(s), basis)
 	if scaling != 1.
 	    for i in 1:length(ps)
 	        ps[i] = scaling * ps[i]
@@ -152,7 +151,7 @@ function apply!(s::QMeasure, state::DensityOperatorMPS; trunc::TruncationScheme=
 		# projection to this state
 		apply!(gate(pos, op), state, trunc=trunc)
 		# println("trace is $(tr(state))")
-		canonicalize!(state, normalize=false, trunc=trunc)
+		canonicalize!(state, alg = Orthogonalize(QS.SVD(), trunc, normalize=false))
 		if s.auto_reset && (outcome == 1)
 			# op = Gates.DOWN
 			apply!(XGate(pos), state, trunc=trunc)

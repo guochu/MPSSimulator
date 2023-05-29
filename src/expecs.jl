@@ -25,7 +25,7 @@ expectation(m::QubitsTerm, psi::MPS, envs::OverlapCache=environments(psi, psi); 
 function expectation(psiA::MPS, h::QubitsOperator, psiB::MPS)
 	(QuantumCircuits.get_largest_pos(h) <= length(psiA)) || throw(DimensionMismatch())
 	envs = environments(psiA, psiB)
-	r = zero(promote_type(scalar_type(psiA), scalar_type(psiB)))
+	r = zero(promote_type(eltype(psiA), eltype(psiB)))
 	for (k, v) in h.data
 		for (x, c) in v
 			m = QubitsTerm(k, x, c)
@@ -51,7 +51,7 @@ end
 function expectation(h::QubitsOperator, psi::DensityOperatorMPS)
 	(length(h) <= length(psi)) || throw(DimensionMismatch())
 	envs = environments(psi, psi)
-	r = zero(scalar_type(psi))
+	r = zero(eltype(psi))
 	for (k, v) in h.data
 		for (x, c) in v
 			m = QubitsTerm(k, x, c)

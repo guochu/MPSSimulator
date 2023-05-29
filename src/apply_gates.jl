@@ -1,13 +1,13 @@
 
 function apply!(s::Gate, mps::MPS; trunc::TruncationScheme=DefaultMPSTruncation) 
 	(length(QuantumCircuits.positions(s)) <= 4) || throw(ArgumentError("only 4-body (or less) gates are currently allowed."))
-	QuantumSpins.svectors_uninitialized(mps) && canonicalize!(mps, normalize=false, trunc=trunc)
+	QuantumSpins.svectors_uninitialized(mps) && canonicalize!(mps, alg=Orthogonalize(QS.SVD(), trunc, normalize=false))
 	return [QuantumSpins._apply_impl(QuantumCircuits.ordered_positions(s), Array(QuantumCircuits.ordered_op(s)), mps, trunc)]
 end 
 
 function apply!(s::Gate, rho::DensityOperatorMPS; trunc::TruncationScheme=DefaultMPSTruncation)
 	(length(QuantumCircuits.positions(s)) <= 4) || throw(ArgumentError("only 4-body (or less) gates are currently allowed."))
-	QuantumSpins.svectors_uninitialized(rho.data) && canonicalize!(rho, normalize=false, trunc=trunc)
+	QuantumSpins.svectors_uninitialized(rho.data) && canonicalize!(rho, alg=Orthogonalize(QS.SVD(), trunc, normalize=false))
 	mop = QuantumCircuits.ordered_op(s)
 	mop = QuantumSpins.rkron(mop, conj(mop))
 	return [QuantumSpins._apply_impl(QuantumCircuits.ordered_positions(s), mop, rho.data, trunc)]
