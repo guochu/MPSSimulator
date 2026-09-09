@@ -25,9 +25,11 @@ function _reorder_gate(m::AbstractMatrix, positions::NTuple{N,Int}) where {N}
     d = 1 << N
     (size(m, 1) == size(m, 2) == d) ||
         throw(ArgumentError("matrix size $(size(m)) does not match $N qubit(s)"))
-    srt = sortperm(collect(positions); rev=true)
-    srt == collect(1:N) && return m   # positions 降序给出时已满足 site a = 最低位
-    perm = (srt..., srt .+ N...)
+    σ = sortperm(collect(positions))              # 站点升序
+    σ == reverse(collect(1:N)) && return m        # positions 降序给出时已是目标布局
+    # 输出轴（快→慢）= 站点升序：第 k 个输出轴对应输入轴 N+1-σ[k]
+    rp = ntuple(k -> N + 1 - σ[k], N)
+    perm = (rp..., rp .+ N...)
     m2 = reshape(permutedims(reshape(m, ntuple(_ -> 2, 2N)), perm), d, d)
     return m2
 end
@@ -37,9 +39,10 @@ function _reorder_superop(m::AbstractMatrix, positions::NTuple{N,Int}) where {N}
     d2 = 1 << (2N)
     (size(m, 1) == size(m, 2) == d2) ||
         throw(ArgumentError("matrix size $(size(m)) does not match $N qubit(s)"))
-    srt = sortperm(collect(positions); rev=true)
-    srt == collect(1:N) && return m
-    perm = (srt..., srt .+ N...)
+    σ = sortperm(collect(positions))
+    σ == reverse(collect(1:N)) && return m
+    rp = ntuple(k -> N + 1 - σ[k], N)
+    perm = (rp..., rp .+ N...)
     return reshape(permutedims(reshape(m, ntuple(_ -> 4, 2N)), perm), d2, d2)
 end
 
