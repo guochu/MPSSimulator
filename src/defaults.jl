@@ -8,4 +8,4 @@
 所有作用型接口（`apply!` / `apply_kraus!` / `measure!` / `simulate` 等）`trunc`
 关键字的默认截断方案：按维数截断到 `50`。
 """
-const DefaultMPSTruncation = truncdim(50)
+const DefaultMPSTruncation = truncdimcutoff(50, 1.0e-8)
