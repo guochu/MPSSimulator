@@ -1,102 +1,40 @@
-push!(LOAD_PATH, dirname(Base.@__DIR__) * "/src")
+# runtests.jl — MPSSimulator 测试
+#
+# 运行方式（本地包经 LOAD_PATH 解析；注意顺序：QuantumCircuits/VQC 必须在
+# MPSSimulator 之前入栈——后者把前者声明为依赖且无 Manifest，先入栈会短路解析）：
+#   JULIA_PROBE_LIBSTDCXX=0 JULIA_DEPOT_PATH=/tmp/jdepot: julia --startup-file=no -e '
+#     push!(LOAD_PATH, "../QuantumCircuits"); push!(LOAD_PATH, "../VQC"); push!(LOAD_PATH, "../MPSSimulator");
+#     include("test/runtests.jl")'
 
 using Test
-using QuantumCircuits, QuantumCircuits.Gates, QuantumSpins
-using MPSSimulator, MPSSimulator.Utilities
-using Zygote
+using LinearAlgebra
+using Random
 
-include("util.jl")
+using QuantumCircuits
+using VQC
 
-println("-----------test quantum circuit simulation-----------------")
+using MPSSimulator
+const MS = MPSSimulator
 
-function to_digits(s::Vector{Int})
-	r = 0.
-	for i = 1:length(s)
-		r = r + s[i]*(2.)^(-i)
-	end
-	return r
+# 两个后端共享的泛型函数名（apply!/measure!/expectation/…）在此统一绑定
+# 到 MPSSimulator 的版本；`simulate` 来自 QuantumCircuits.Interface（按态类型
+# 派发到对应后端）；VQC 特有的调用用 `VQC.` 限定。
+import MPSSimulator: apply, apply!, apply_kraus!, reset_qubit_zero!,
+                     measure!, probabilities, marginal_probabilities, sample,
+                     post_select, post_select!,
+                     partial_tr, expectation, fidelity, amplitude, statevector,
+                     canonicalize!, normalize!,
+                     distance, distance2
+import QuantumCircuits.Interface: simulate!
+
+Random.seed!(20260908)
+
+@testset "MPSSimulator" begin
+    include("tensorops.jl")
+    include("states.jl")
+    include("apply.jl")
+    include("mixed.jl")
+    include("measure.jl")
+    include("expect.jl")
+    include("circuit.jl")
 end
-
-function phase_estimate_circuit(j::Vector{Int})
-	L = length(j)
-	circuit = QCircuit()
-	phi = to_digits(j)
-	U = [exp(2*pi*im*phi) 0; 0. 1.]
-	for i = 1:L
-		push!(circuit, gate(i, H))
-	end
-
-	tmp = U
-	for i = L:-1:1
-		push!(circuit, gate((i, L+1), CONTROL(tmp)))
-		tmp = tmp * tmp
-	end
-	append!(circuit, QFT(L)')
-	return circuit
-end
-
-
-function simple_phase_estimation_1(L::Int, auto_reset::Bool=false)
-	j = rand(0:1, L)
-	state = statevector_mps(L+1)
-	phi = to_digits(j)
-	circuit = phase_estimate_circuit(j)
-	apply!(circuit, state)
-	res = Int[]
-	for i = 1:(L+1)
-		i, p = measure!(state, i, keep=true, auto_reset=auto_reset)
-		push!(res, i)
-	end
-	phi_out = to_digits(res)
-	return (phi == phi_out) && (j[1:L] == res[1:L])
-end
-
-function simple_phase_estimation_2(L::Int, auto_reset::Bool=false)
-	j = rand(0:1, L)
-	state = statevector_mps(L+1)
-	phi = to_digits(j)
-	circuit = phase_estimate_circuit(j)
-	apply!(circuit, state)
-	res = Int[]
-	for i = 1:(L+1)
-		i, p = measure!(state, 1, keep=false, auto_reset=auto_reset)
-		push!(res, i)
-	end
-	phi_out = to_digits(res)
-	return (phi == phi_out) && (j[1:L] == res[1:L])
-end
-
-function dm_phase_estimation_1(L::Int, auto_reset::Bool=false)
-	j = rand(0:1, L)
-	state = densitymatrix_mps(L+1)
-	phi = to_digits(j)
-	circuit = phase_estimate_circuit(j)
-	apply!(circuit, state)
-
-	res = Int[]
-	for i = 1:(L+1)
-		i, p = measure!(state, i, auto_reset=auto_reset)
-		push!(res, i)
-	end
-	phi_out = to_digits(res)
-	return (phi == phi_out) && (j[1:L] == res[1:L])
-end
-
-@testset "test quantum phase estimation algorithm" begin
-	for L in [5, 6]
-		@test simple_phase_estimation_1(L, false)
-		@test simple_phase_estimation_1(L, true)
-		@test simple_phase_estimation_2(L, false)
-		@test simple_phase_estimation_2(L, true)
-
-		@test dm_phase_estimation_1(L, true)
-	end
-end
-
-println("-----------test parametric quantum circuit-----------------")
-
-@testset "test expectation value gradient" begin
-    include("check_diff.jl")
-end
-
-

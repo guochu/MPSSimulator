@@ -1,12 +1,22 @@
 name = "MPSSimulator"
 uuid = "81a3ca4a-d8a6-413d-b6dc-9dafd4a3cd05"
 authors = ["Guo Chu <guochu604b@gmail.com>"]
-version = "0.0.1"
-
+version = "0.1.0"
 
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+MatrixAlgebraKit = "6c742aac-3347-4629-af66-fc926824e5e4"
 QuantumCircuits = "aefa5731-75ce-4e77-8b64-9dbb49b79a07"
-QuantumSpins = "6fed88ee-e401-4db1-9637-2ff0b433ab63"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 TensorOperations = "6aa20fa7-93e2-5fca-9bc0-fbd0db3c71a2"
-Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
+
+[compat]
+julia = "1.10"
+
+[extras]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+VQC = "1a0f967e-e74f-4f58-8b53-d7c235b06da4"
+
+[targets]
+test = ["Test", "LinearAlgebra", "VQC"]

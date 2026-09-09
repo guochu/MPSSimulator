@@ -1,0 +1,11 @@
+# 文档构建产物
+docs/build/
+
+# 测试覆盖率
+*.jl.cov
+*.jl.*.cov
+
+# Julia 系统文件
+*.ji
+*.o
+Depot.jl
