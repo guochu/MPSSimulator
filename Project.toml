@@ -4,6 +4,7 @@ authors = ["Guo Chu <guochu604b@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+FiniteMPSAlgorithms = "b7c1d2a3-4e5f-4a6b-8c7d-9e0f1a2b3c4d"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MatrixAlgebraKit = "6c742aac-3347-4629-af66-fc926824e5e4"
 QuantumCircuits = "aefa5731-75ce-4e77-8b64-9dbb49b79a07"

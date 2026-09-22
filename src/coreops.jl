@@ -7,10 +7,13 @@
 #   * 所有作用型接口接受 `trunc` 关键字（`TruncationScheme`），
 #     默认 `DefaultMPSTruncation`。
 #
-# 正则形式管理：若 `svectors` 未初始化，多体门作用前会先做一次
-# `canonicalize!`（单比特门不需要键谱，无需正则化）。酉门严格保持
-# 正则形式；非幺正算子（投影 / Kraus）可能破坏正则性——状态始终
-# 精确，需要时可调用 `canonicalize!` 恢复。
+# 正则形式管理：若键谱未初始化，多体门作用前会先做一次
+# `canonicalize!`（单比特门不需要键谱，无需正则化）。门作用机制复用
+# FiniteMPSAlgorithms：两体门走 `apply!(::UnitaryGate/GeneralGate, CanonicalMPS)`
+# （Hastings 更新；`GeneralGate` 作用后自动重新正则化），SWAP 走
+# `FiniteMPSAlgorithms.swap!`；仅单比特门与 N ≥ 3 体相邻块门使用本地内核。
+# 酉门严格保持正则形式；非幺正算子（投影 / Kraus）可能破坏正则性——
+# 状态始终精确，需要时可用 `canonicalize!` 恢复。
 
 _check_positions(positions::NTuple{N,Int}, n::Int) where {N} = begin
     allunique(positions) || throw(ArgumentError("duplicate qubit positions"))
@@ -21,10 +24,14 @@ end
 
 function _ensure_complex(psi::AbstractMPS)
     eltype(psi) <: Complex && return psi
-    T = complex(float(eltype(psi)))
-    data = [convert(Array{T,3}, A) for A in psi.data]
-    # 用不带类型参数的外层构造器按 data 的标量类型重新定参
-    return convert(AbstractMPS{T}, typeof(psi).name.wrapper(data, psi.svectors))
+    return convert(AbstractMPS{complex(float(eltype(psi)))}, psi)
+end
+
+"把站点升序的 `d^N × d^N` 矩阵包成 FiniteMPSAlgorithms 的两体门（酉性自动检查）。"
+function _local_gate(m::AbstractMatrix, positions::NTuple{2,Int}, d::Int)
+    G = reshape(m, d, d, d, d)   # (i₁′, i₂′, i₁, i₂)：site 1（最低位）为慢位
+    return isunitary(Matrix(m); atol=1.0e-10) ? UnitaryGate(positions, G) :
+           GeneralGate(positions, G)
 end
 
 function _apply_matrix!(psi::AbstractMPS, m::AbstractMatrix, positions::NTuple{N,Int},
@@ -39,7 +46,11 @@ function _apply_matrix!(psi::AbstractMPS, m::AbstractMatrix, positions::NTuple{N
         _apply_gate_1site!(psi, m, ps[1])
     else
         svectors_uninitialized(psi) && canonicalize!(psi; normalize=false)
-        if length(ps) == 1 || ps[end] - ps[1] == N - 1
+        if N == 2
+            # 两体门：复用 FiniteMPSAlgorithms（Hastings 更新 + 非相邻自动交换）
+            apply!(_local_gate(m, Tuple(ps), d), psi.core; trunc=trunc)
+            _sync!(psi)
+        elseif ps[end] - ps[1] == N - 1
             _apply_gate_block!(psi, m, ps[1], N, trunc)
         else
             swaps = _gather!(psi, ps, trunc)

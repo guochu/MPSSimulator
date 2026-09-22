@@ -14,8 +14,10 @@
 - **纯态**：`MPS`（局域维 2），**混合态**：`DensityOperatorMPS`（局域维 4，
   ket/bra 融合指标 `p = i + 2j`）；二者继承同一抽象类型 `AbstractMPS`，
   共用数据布局与绝大多数操作
-- **混合正则形式存储**：站点张量保持右正则，`svectors` 记录各键 Schmidt 谱；
-  幺正演化全程保持正则形式
+- **基于 `FiniteMPSAlgorithms.CanonicalMPS` 的薄封装**：站点张量保持右正则，
+  键 Schmidt 谱记录于 `s`；正则化 / 相邻交换 / 两体门与张量操作层均复用
+  [`FiniteMPSAlgorithms`](../FiniteMPSAlgorithms) 的现成实现；幺正演化全程
+  保持正则形式
 - **Hastings 式门更新**：相邻块截断 SVD 扫描，长程 / 多体门自动以相邻 SWAP
   聚集后作用再散开；**所有作用型接口接受 `trunc` 关键字**做逐键截断
 - **噪声即指令**：`KrausOp` / `Depolarizing` / `AmplitudeDamping` 等信道
@@ -30,7 +32,8 @@
 ## 环境要求
 
 - Julia ≥ 1.10
-- 本地包依赖：[`QuantumCircuits`](../QuantumCircuits)（IR 与接口协议）
+- 本地包依赖：[`QuantumCircuits`](../QuantumCircuits)（IR 与接口协议）、
+  [`FiniteMPSAlgorithms`](../FiniteMPSAlgorithms)（CanonicalMPS 与张量操作）
 - 测试额外依赖：[`VQC`](../VQC)（稠密后端，用于交叉验证）
 
 ## 安装
@@ -39,13 +42,15 @@
 
 ```julia
 # 方式一：开发环境经 LOAD_PATH 解析（无 Manifest，最轻量）
-# 顺序很重要：QuantumCircuits 必须在 MPSSimulator 之前入栈
+# 顺序很重要：依赖包必须在 MPSSimulator 之前入栈
 push!(LOAD_PATH, ".../QuantumCircuits")
+push!(LOAD_PATH, ".../FiniteMPSAlgorithms")
 push!(LOAD_PATH, ".../MPSSimulator")
 
 # 方式二：Pkg 开发挂接
 using Pkg
 Pkg.develop(path = ".../QuantumCircuits")
+Pkg.develop(path = ".../FiniteMPSAlgorithms")
 Pkg.develop(path = ".../MPSSimulator")
 ```
 
@@ -116,7 +121,7 @@ rs.counts                                     # Dict{String,Int}，键如 "c:00"
 | 比特索引 | 1-based、小端序（qubit 1 = 最低有效位；站点 `k` ↔ qubit `k-1`） |
 | 门矩阵 | `positions` 中**第一个比特为矩阵最高位**（MSB-first） |
 | 站点张量 | 轴序 = (左键, 物理维, 右键)，开放边界 |
-| 正则形式 | 站点张量右正则 + `svectors` 键谱；幺正演化严格保持，投影 / Kraus 可能破坏（状态精确，`canonicalize!` 可恢复） |
+| 正则形式 | 站点张量右正则 + 键谱 `s`；幺正演化严格保持，投影 / Kraus 可能破坏（状态精确，`canonicalize!` 可恢复） |
 | 混合态融合指标 | 局域维 4，`p = i + 2j`（`i` = ket 行指标为低位） |
 
 ## API 总览
@@ -145,10 +150,10 @@ rs.counts                                     # Dict{String,Int}，键如 "c:00"
 中途测量、`IfOp` 经典反馈、`BlockOp`）、`ClassicalStore`（经典寄存器运行时）、
 `MatrixProductBackend`（Interface 后端）。
 
-**张量操作层**（与 TEMPO `tensorops` 接口一致）：截断方案
-（`NoTruncation` / `truncdim` / `trunccutoff` / `truncdimcutoff`）、
-正交分解（`leftorth!` / `rightorth!`，算法 `QR` / `QRpos` / `LQ` / `LQpos` /
-`SVD` / `SDD` / `Polar`）、带截断 SVD（`tsvd!`）、`renyi_entropy`。
+**张量操作层**（re-export 自 `FiniteMPSAlgorithms`，与 TEMPO `tensorops`
+接口一致）：截断方案（`NoTruncation` / `truncdim` / `trunccutoff` /
+`truncdimcutoff`）、正交分解（`leftorth!` / `rightorth!`，算法 `QR` / `QRpos` /
+`LQ` / `LQpos` / `SVD` / `SDD` / `Polar`）、带截断 SVD（`tsvd!`）、`renyi_entropy`。
 
 各导出项的完整签名与语义请查阅 docstring（REPL 中 `?函数名`）。
 

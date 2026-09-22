@@ -12,6 +12,7 @@
 
 const ROOT = dirname(@__DIR__)
 push!(LOAD_PATH, joinpath(dirname(ROOT), "QuantumCircuits"))
+push!(LOAD_PATH, joinpath(dirname(ROOT), "FiniteMPSAlgorithms"))
 push!(LOAD_PATH, joinpath(dirname(ROOT), "VQC"))
 push!(LOAD_PATH, ROOT)
 

@@ -7,15 +7,18 @@ QuantumCircuits IR 的 **矩阵乘积态（MPS）模拟后端**（与态矢量�
 `src/kernels` / `src/coreops` / `src/ops` / `src/expecs` 只依赖通用张量操作，
 不引用任何 IR 类型）：
 
-* **张量操作层**（`src/tensorops`）：截断方案、正交 / 奇异值分解，
-  与 TEMPO 的 `tensorops` 接口一致，由 MatrixAlgebraKit 驱动；
-* **态层**（`src/states`）：抽象基类 `AbstractMPS`、纯态 `MPS`（局域维 2）与
-  混合态 `DensityOperatorMPS`（局域维 4，融合指标 `p = i + 2j`）——两者共用
-  同一数据布局；存储采用混合正则形式——站点张量右正则，`svectors` 记录
-  各键 Schmidt 谱；
+* **张量操作层**：直接复用并 re-export `FiniteMPSAlgorithms` 的实现
+  （截断方案、正交 / 奇异值分解、距离度量，由 MatrixAlgebraKit 驱动）；
+* **态层**（`src/states`）：纯态 `MPS`（局域维 2）与混合态 `DensityOperatorMPS`
+  （局域维 4，融合指标 `p = i + 2j`）——两者都是
+  `FiniteMPSAlgorithms.CanonicalMPS` 的**薄封装**：站点张量存储、键 Schmidt
+  谱、正则化（`canonicalize!`）、相邻交换（`swap!`）、两体门与线性代数
+  （`dot` / `norm` / `distance`）均复用 FiniteMPSAlgorithms 的现成实现；
 * **核心层**（`src/kernels` / `src/coreops` / `src/ops` / `src/expecs` /
   `src/initializers`）：局域矩阵 / Kraus 原语（`apply!` / `apply_kraus!`，
-  支持任意比特位置——非相邻位置自动经 SWAP 聚集）、测量 / 后选择 /
+  支持任意比特位置——非相邻位置自动经 SWAP 聚集；两体门直接走
+  FiniteMPSAlgorithms 的 `UnitaryGate` / `GeneralGate` 路径，本地内核只保留
+  比特轴重排、超算符映射、单比特门与 N ≥ 3 体块门）、测量 / 后选择 /
   偏迹、期望值、态初始化；**所有作用型接口均接受 `trunc` 关键字**
   （`TruncationScheme`，默认 `DefaultMPSTruncation`）；
 * **QuantumCircuits 桥接层**（`src/quantumcircuits`）：把 IR 指令
@@ -30,8 +33,9 @@ QuantumCircuits IR 的 **矩阵乘积态（MPS）模拟后端**（与态矢量�
 * 比特索引 **1-based**，小端序（qubit 1 = 最低有效位）；
 * 门矩阵约定：`positions` 列表中**第一个比特为矩阵最高位**；
 * 站点张量轴序 = (左键, 物理维, 右键)，开放边界；
-* 幺正演化严格保持正则形式；非幺正算子（投影 / Kraus）可能破坏正则性
-  （状态始终精确，需要时可用 `canonicalize!` 恢复）。
+* 封装层保持 `scaling == 1`（范数在站点数据中）；幺正演化严格保持
+  正则形式；非幺正算子（投影 / Kraus）可能破坏正则性（状态始终精确，
+  需要时可用 `canonicalize!` 恢复）。
 
 核心接口：
 
@@ -45,10 +49,9 @@ QuantumCircuits IR 的 **矩阵乘积态（MPS）模拟后端**（与态矢量�
 module MPSSimulator
 
 using LinearAlgebra
-using LinearAlgebra: BlasFloat
 using Random
 using TensorOperations
-using MatrixAlgebraKit
+using MatrixAlgebraKit: isunitary
 
 using QuantumCircuits
 using QuantumCircuits: GateOp, ChannelOp, MeasOp, ReinitOp, BarrierOp, IfOp, BlockOp,
@@ -57,16 +60,28 @@ using QuantumCircuits: GateOp, ChannelOp, MeasOp, ReinitOp, BarrierOp, IfOp, Blo
 import QuantumCircuits: nqubits, measure
 using QuantumCircuits.Interface: Backend
 
-# ── 张量操作层 ───────────────────────────────────────────────────────────────
-include("tensorops/tensorops.jl")
+# ── FiniteMPSAlgorithms：张量操作 / CanonicalMPS / 门 ───────────────────────
+using FiniteMPSAlgorithms
+using FiniteMPSAlgorithms: CanonicalMPS, Orthogonalize, UnitaryGate, GeneralGate,
+                           prodmps, randommps, scaling, setscaling!,
+                           QR, QRpos, LQ, LQpos, SVD, SDD, Polar
+# 扩展 FiniteMPSAlgorithms 的泛型函数（封装态的方法挂到同一函数上）
+import FiniteMPSAlgorithms: apply!, canonicalize!, expectation, fidelity,
+                            distance, distance2, iscanonical, isrightcanonical,
+                            svectors_uninitialized, permute
+import LinearAlgebra: normalize!, norm, dot, tr
+
+# ── 张量操作层（re-export FiniteMPSAlgorithms）──────────────────────────────
+# 兼容别名：MPSSimulator 旧名 → FiniteMPSAlgorithms 的截断方案类型
+const TruncateCutoff = TruncateRelError
+const TruncationDimCutoff = TruncateDimCutoff
+trunccutoff(args...; kwargs...) = truncrelerr(args...; kwargs...)
 
 # ── 默认参数 ────────────────────────────────────────────────────────────────
 include("defaults.jl")
 
 # ── 态 ──────────────────────────────────────────────────────────────────────
-include("states/abstractmps.jl")
 include("states/mps.jl")
-include("states/densityoperator.jl")
 
 # ── 核心层 ──────────────────────────────────────────────────────────────────
 include("kernels.jl")
@@ -79,7 +94,7 @@ include("initializers.jl")
 include("quantumcircuits/quantumcircuits.jl")
 
 # ── 导出 ────────────────────────────────────────────────────────────────────
-export # 张量操作
+export # 张量操作（FiniteMPSAlgorithms re-export）
     TruncationScheme, NoTruncation, TruncateDim, TruncateCutoff, TruncationDimCutoff,
     truncdim, trunccutoff, truncdimcutoff,
     QR, QRpos, LQ, LQpos, SVD, SDD, Polar,

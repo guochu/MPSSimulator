@@ -2,18 +2,24 @@
 #
 # 命名与 VQC 对齐（加 `_mps` 后缀以避免与稠密后端的导出冲突），
 # 同时保留旧版 `statevector_mps` / `densitymatrix_mps` 别名。
+# 乘积态与随机态直接复用 FiniteMPSAlgorithms 的 `prodmps` / `randommps`。
+
+"乘积态：把内部键（维为 1）的键谱初始化为平凡 `[1]`，免去首次多体门前的正则化。"
+function _init_trivial_svectors!(psi::AbstractMPS)
+    s = psi.core.s
+    for i in 2:length(psi)          # 内部键谱：s[2:L]
+        s[i] = [one(real(eltype(psi)))]
+    end
+    return psi
+end
 
 "乘积态 MPS：`amps[i]` 为站点 `i` 的局域振幅（长度 2 向量）。"
 function _productmps(::Type{T}, amps::AbstractVector{<:AbstractVector}) where {T<:Number}
     L = length(amps)
     L >= 1 || throw(ArgumentError("empty state"))
-    data = [Array{T,3}(undef, 1, 2, 1) for _ in 1:L]
-    for (k, a) in enumerate(amps)
-        length(a) == 2 || throw(ArgumentError("each local amplitude must have length 2"))
-        data[k][1, :, 1] .= a
-    end
-    R = real(T)
-    return MPS(data, [[one(R)] for _ in 1:(L+1)])   # 乘积态：平凡键谱
+    all(a -> length(a) == 2, amps) ||
+        throw(ArgumentError("each local amplitude must have length 2"))
+    return _init_trivial_svectors!(MPS(prodmps(T, collect(amps))))
 end
 
 """
@@ -87,7 +93,7 @@ function amplitude_encoding_mps(::Type{T}, v::AbstractVector{<:Number};
         Dl = r
     end
     data[nqubits] = reshape(Θ, Dl, 2, 1)
-    psi = MPS(data)
+    psi = MPS(CanonicalMPS(data))
     trunc isa NoTruncation || normalize!(psi)
     return psi
 end
@@ -98,19 +104,12 @@ amplitude_encoding_mps(v::AbstractVector{<:Number}; kwargs...) =
 """
     rand_state_mps([T=ComplexF64,] n; D=8) -> MPS
 
-键维上限 `D` 的随机纯态（高斯张量 + 左正则归一化）。
+键维上限 `D` 的随机纯态（高斯张量，经 `FiniteMPSAlgorithms.randommps`
+正则化并归一）。
 """
 function rand_state_mps(::Type{T}, n::Int; D::Int=8) where {T<:Number}
     n >= 1 || throw(ArgumentError("number of qubits must be positive"))
-    data = Vector{Array{T,3}}(undef, n)
-    for k in 1:n
-        dl = (k == 1) ? 1 : min(D, 2^(k-1), 2^(n-k+1))
-        dr = (k == n) ? 1 : min(D, 2^k, 2^(n-k))
-        data[k] = randn(T, dl, 2, dr)
-    end
-    psi = MPS(data)
-    canonicalize!(psi)
-    return psi
+    return _sync!(MPS(randommps(T, fill(2, n); D=D)))
 end
 
 rand_state_mps(n::Int; kwargs...) = rand_state_mps(ComplexF64, n; kwargs...)
@@ -143,19 +142,15 @@ end
     densitymatrix_mps([T=ComplexF64,] n) -> DensityOperatorMPS
     densitymatrix_mps([T=ComplexF64,] bits::Vector{Int}) -> DensityOperatorMPS
 
-计算基态的密度算符 MPS（`|bits⟩⟨bits|`）。
+计算基态的密度算符 MPS（`|bits⟩⟨bits|`）。复用 FiniteMPSAlgorithms 的
+`prodmps`：`|b⟩⟨b|` 的融合指标为 `p = i + 2j = 3b`（1-based 索引 `3b+1`）。
 """
 function densitymatrix_mps(::Type{T}, states::Vector{Int}) where {T<:Number}
     L = length(states)
     L >= 1 || throw(ArgumentError("empty state"))
-    data = [Array{T,3}(undef, 1, 4, 1) for _ in 1:L]
-    for (k, b) in enumerate(states)
-        (b == 0 || b == 1) || throw(ArgumentError("bits must be 0 or 1"))
-        fill!(data[k], zero(T))
-        data[k][1, 1 + 2 * b, 1] = one(T)   # 融合指标 p = i + 2j
-    end
-    R = real(T)
-    return DensityOperatorMPS(data, [[one(R)] for _ in 1:(L+1)])
+    all(b -> b == 0 || b == 1, states) || throw(ArgumentError("bits must be 0 or 1"))
+    rho = DensityOperatorMPS(prodmps(T, fill(4, L), [3 * b + 1 for b in states]))
+    return _init_trivial_svectors!(rho)
 end
 
 densitymatrix_mps(::Type{T}, n::Int) where {T<:Number} = densitymatrix_mps(T, zeros(Int, n))

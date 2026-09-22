@@ -1,0 +1,235 @@
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.10.11"
+manifest_format = "2.0"
+project_hash = "fc76b7db1ff64f182131f7a12f37320aa6a9e156"
+
+[[deps.Artifacts]]
+uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
+
+[[deps.CompilerSupportLibraries_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
+version = "1.1.1+0"
+
+[[deps.Dates]]
+deps = ["Printf"]
+uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[deps.FiniteMPSAlgorithms]]
+deps = ["KrylovKit", "LinearAlgebra", "MatrixAlgebraKit", "Random", "TensorOperations"]
+path = "../FiniteMPSAlgorithms"
+uuid = "b7c1d2a3-4e5f-4a6b-8c7d-9e0f1a2b3c4d"
+version = "0.1.0"
+
+[[deps.KrylovKit]]
+deps = ["LinearAlgebra", "PackageExtensionCompat", "Printf", "Random", "VectorInterface"]
+git-tree-sha1 = "a3babd26e875e83b461e1c0f945bff52701e8181"
+uuid = "0b1a1467-8014-51b9-945f-bf0ae24f4b77"
+version = "0.10.4"
+
+    [deps.KrylovKit.extensions]
+    KrylovKitChainRulesCoreExt = "ChainRulesCore"
+
+    [deps.KrylovKit.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+
+[[deps.LRUCache]]
+git-tree-sha1 = "5519b95a490ff5fe629c4a7aa3b3dfc9160498b3"
+uuid = "8ac3fa9e-de4c-5943-b1dc-09c6b5f20637"
+version = "1.6.2"
+
+    [deps.LRUCache.extensions]
+    SerializationExt = ["Serialization"]
+
+    [deps.LRUCache.weakdeps]
+    Serialization = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+
+[[deps.Libdl]]
+uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+
+[[deps.LinearAlgebra]]
+deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
+uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
+[[deps.MatrixAlgebraKit]]
+deps = ["LinearAlgebra", "PrecompileTools"]
+git-tree-sha1 = "0f958855fc2efdc59f1b6a5a066ee3026e87edb3"
+uuid = "6c742aac-3347-4629-af66-fc926824e5e4"
+version = "0.6.9"
+
+    [deps.MatrixAlgebraKit.extensions]
+    MatrixAlgebraKitAMDGPUExt = "AMDGPU"
+    MatrixAlgebraKitCUDAExt = "CUDA"
+    MatrixAlgebraKitChainRulesCoreExt = "ChainRulesCore"
+    MatrixAlgebraKitEnzymeExt = "Enzyme"
+    MatrixAlgebraKitGenericLinearAlgebraExt = "GenericLinearAlgebra"
+    MatrixAlgebraKitGenericSchurExt = "GenericSchur"
+    MatrixAlgebraKitMooncakeExt = "Mooncake"
+
+    [deps.MatrixAlgebraKit.weakdeps]
+    AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+    CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+    GenericLinearAlgebra = "14197337-ba66-59df-a3e3-ca00e7dcff7a"
+    GenericSchur = "c145ed77-6b09-5dd9-b285-bf645a82121e"
+    Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
+
+[[deps.OpenBLAS_jll]]
+deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
+uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
+version = "0.3.23+5"
+
+[[deps.PackageExtensionCompat]]
+git-tree-sha1 = "fb28e33b8a95c4cee25ce296c817d89cc2e53518"
+uuid = "65ce6f38-6b18-4e1d-a461-8949797d7930"
+version = "1.0.2"
+
+    [deps.PackageExtensionCompat.weakdeps]
+    Requires = "ae029012-a4dd-5104-9daa-d747884805df"
+    TOML = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+
+[[deps.PrecompileTools]]
+deps = ["Preferences"]
+git-tree-sha1 = "5aa36f7049a63a1528fe8f7c3f2113413ffd4e1f"
+uuid = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
+version = "1.2.1"
+
+[[deps.Preferences]]
+deps = ["TOML"]
+git-tree-sha1 = "5005266de4bfe50e53ff44a5cb5c540b6e47a254"
+uuid = "21216c6a-2e73-6563-6e65-726566657250"
+version = "1.6.0"
+
+[[deps.Printf]]
+deps = ["Unicode"]
+uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+
+[[deps.PtrArrays]]
+git-tree-sha1 = "4fbbafbc6251b883f4d2705356f3641f3652a7fe"
+uuid = "43287f4e-b6f4-7ad1-bb20-aadabca52c3d"
+version = "1.4.0"
+
+[[deps.QuantumCircuits]]
+deps = ["LinearAlgebra"]
+path = "../QuantumCircuits"
+uuid = "aefa5731-75ce-4e77-8b64-9dbb49b79a07"
+version = "0.1.0"
+
+    [deps.QuantumCircuits.extensions]
+    QuantumCircuitsLuxorExt = "Luxor"
+
+    [deps.QuantumCircuits.weakdeps]
+    Luxor = "ae8d54c2-7ccd-5906-9d76-62fc9837b5bc"
+
+[[deps.Random]]
+deps = ["SHA"]
+uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[[deps.SHA]]
+uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+version = "0.7.0"
+
+[[deps.Strided]]
+deps = ["LinearAlgebra", "PrecompileTools", "StridedViews", "TupleTools"]
+git-tree-sha1 = "5fa7f6845c91e6e351880cee67a9efc3b892bd3b"
+uuid = "5e0ebb24-38b0-5f93-81fe-25c709ecae67"
+version = "2.6.4"
+
+    [deps.Strided.extensions]
+    StridedAMDGPUExt = "AMDGPU"
+    StridedGPUArraysExt = "GPUArrays"
+    StridedcuBLASExt = "cuBLAS"
+
+    [deps.Strided.weakdeps]
+    AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+    GPUArrays = "0c68f7d7-f131-5f86-a1c3-88cf8149b2d7"
+    cuBLAS = "182d3088-87b7-4494-8cad-fc6afaa545bc"
+
+[[deps.StridedViews]]
+deps = ["LinearAlgebra", "PrecompileTools"]
+git-tree-sha1 = "21dc3942c478661f72c527ff5d67baa98e555372"
+uuid = "4db3bf67-4bd7-4b4e-b153-31dc3fb37143"
+version = "0.5.2"
+
+    [deps.StridedViews.extensions]
+    StridedViewsAMDGPUExt = "AMDGPU"
+    StridedViewsAdaptExt = "Adapt"
+    StridedViewsCUDACoreExt = "CUDACore"
+    StridedViewsJLArraysExt = "JLArrays"
+    StridedViewsPtrArraysExt = "PtrArrays"
+
+    [deps.StridedViews.weakdeps]
+    AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+    Adapt = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
+    CUDACore = "bd0ed864-bdfe-4181-a5ed-ce625a5fdea2"
+    JLArrays = "27aeb0d3-9eb9-45fb-866b-73c2ecf80fcb"
+    Metal = "dde4c033-4e86-420c-a63e-0dd931031962"
+    PtrArrays = "43287f4e-b6f4-7ad1-bb20-aadabca52c3d"
+
+[[deps.TOML]]
+deps = ["Dates"]
+uuid = "fa267f1f-6049-4f14-aa54-33bafae1ed76"
+version = "1.0.3"
+
+[[deps.TensorOperations]]
+deps = ["LRUCache", "LinearAlgebra", "PackageExtensionCompat", "PrecompileTools", "Preferences", "PtrArrays", "Strided", "StridedViews", "TupleTools", "VectorInterface"]
+git-tree-sha1 = "34c928c9e8fecc2797cc83232e5b67def70019b9"
+uuid = "6aa20fa7-93e2-5fca-9bc0-fbd0db3c71a2"
+version = "5.8.1"
+
+    [deps.TensorOperations.extensions]
+    TensorOperationsAMDGPUExt = "AMDGPU"
+    TensorOperationsBumperExt = "Bumper"
+    TensorOperationsCUDACoreExt = "CUDACore"
+    TensorOperationsChainRulesCoreExt = "ChainRulesCore"
+    TensorOperationsEnzymeExt = "Enzyme"
+    TensorOperationsGPUArraysExt = "GPUArrays"
+    TensorOperationsJLArraysExt = "JLArrays"
+    TensorOperationsMooncakeExt = "Mooncake"
+    TensorOperationsTBLISExt = "TBLIS"
+    TensorOperationscuTENSORExt = "cuTENSOR"
+
+    [deps.TensorOperations.weakdeps]
+    AMDGPU = "21141c5a-9bdb-4563-92ae-f87d6854732e"
+    Bumper = "8ce10254-0962-460f-a3d8-1f77fea1446e"
+    CUDACore = "bd0ed864-bdfe-4181-a5ed-ce625a5fdea2"
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+    GPUArrays = "0c68f7d7-f131-5f86-a1c3-88cf8149b2d7"
+    JLArrays = "27aeb0d3-9eb9-45fb-866b-73c2ecf80fcb"
+    Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
+    TBLIS = "48530278-0828-4a49-9772-0f3830dfa1e9"
+    cuTENSOR = "011b41b2-24ef-40a8-b3eb-fa098493e9e1"
+
+[[deps.TupleTools]]
+git-tree-sha1 = "a1c7e924f746f0ebc792425e7d4d2ea5b4470697"
+uuid = "9d95972d-f1c8-5527-a6e0-b4b365fa01f6"
+version = "1.6.1"
+
+[[deps.Unicode]]
+uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+
+[[deps.VectorInterface]]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "949dd28df19a5bf0973214e4a9d36c19079d4d45"
+uuid = "409d34a3-91d5-4945-b6ec-7529ddf182d8"
+version = "0.6.0"
+
+    [deps.VectorInterface.extensions]
+    VectorInterfaceChainRulesCoreExt = "ChainRulesCore"
+    VectorInterfaceEnzymeExt = "Enzyme"
+    VectorInterfaceMooncakeExt = "Mooncake"
+    VectorInterfaceStaticArraysExt = "StaticArrays"
+
+    [deps.VectorInterface.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
+    Mooncake = "da2b9cff-9c12-43a0-ae48-6db2b0edb7d6"
+    StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[[deps.libblastrampoline_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
+version = "5.11.0+0"

@@ -1,9 +1,10 @@
 # runtests.jl — MPSSimulator 测试
 #
-# 运行方式（本地包经 LOAD_PATH 解析；注意顺序：QuantumCircuits/VQC 必须在
-# MPSSimulator 之前入栈——后者把前者声明为依赖且无 Manifest，先入栈会短路解析）：
+# 运行方式（本地包经 LOAD_PATH 解析；注意顺序：QuantumCircuits/FiniteMPSAlgorithms/VQC
+# 必须在 MPSSimulator 之前入栈——后者把前三者声明为依赖且无 Manifest，先入栈会短路解析）：
 #   JULIA_PROBE_LIBSTDCXX=0 JULIA_DEPOT_PATH=/tmp/jdepot: julia --startup-file=no -e '
-#     push!(LOAD_PATH, "../QuantumCircuits"); push!(LOAD_PATH, "../VQC"); push!(LOAD_PATH, "../MPSSimulator");
+#     push!(LOAD_PATH, "../QuantumCircuits"); push!(LOAD_PATH, "../FiniteMPSAlgorithms");
+#     push!(LOAD_PATH, "../VQC"); push!(LOAD_PATH, "../MPSSimulator");
 #     include("test/runtests.jl")'
 
 using Test
