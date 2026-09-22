@@ -43,13 +43,13 @@ reset_qubit_zero!
 
 ## 截断方案
 
-默认截断为 `DefaultMPSTruncation = truncdim(50)`（集中定义于
+默认截断为 `DefaultMPSTruncation = truncdimcutoff(50, 1e-8)`（集中定义于
 `src/defaults.jl`）。可选方案：
 
 ```@docs
 NoTruncation
 truncdim
-trunccutoff
+truncrelerr
 truncdimcutoff
 DefaultMPSTruncation
 ```
@@ -58,5 +58,5 @@ DefaultMPSTruncation
 
 ```julia
 apply!(ψ, M, (1, 2); trunc = truncdim(16))
-apply!(ψ, M, (1, 2); trunc = trunccutoff(ϵ = 1e-8))
+apply!(ψ, M, (1, 2); trunc = truncrelerr(ϵ = 1e-8))
 ```

@@ -72,10 +72,6 @@ import FiniteMPSAlgorithms: apply!, canonicalize!, expectation, fidelity,
 import LinearAlgebra: normalize!, norm, dot, tr
 
 # ── 张量操作层（re-export FiniteMPSAlgorithms）──────────────────────────────
-# 兼容别名：MPSSimulator 旧名 → FiniteMPSAlgorithms 的截断方案类型
-const TruncateCutoff = TruncateRelError
-const TruncationDimCutoff = TruncateDimCutoff
-trunccutoff(args...; kwargs...) = truncrelerr(args...; kwargs...)
 
 # ── 默认参数 ────────────────────────────────────────────────────────────────
 include("defaults.jl")
@@ -95,8 +91,8 @@ include("quantumcircuits/quantumcircuits.jl")
 
 # ── 导出 ────────────────────────────────────────────────────────────────────
 export # 张量操作（FiniteMPSAlgorithms re-export）
-    TruncationScheme, NoTruncation, TruncateDim, TruncateCutoff, TruncationDimCutoff,
-    truncdim, trunccutoff, truncdimcutoff,
+    TruncationScheme, NoTruncation, TruncateDim, TruncateRelError, TruncateDimCutoff,
+    truncdim, truncrelerr, truncdimcutoff,
     QR, QRpos, LQ, LQpos, SVD, SDD, Polar,
     tsvd, tsvd!, leftorth, leftorth!, rightorth, rightorth!,
     permute, tie, distance, distance2, renyi_entropy,

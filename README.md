@@ -151,7 +151,7 @@ rs.counts                                     # Dict{String,Int}，键如 "c:00"
 `MatrixProductBackend`（Interface 后端）。
 
 **张量操作层**（re-export 自 `FiniteMPSAlgorithms`，与 TEMPO `tensorops`
-接口一致）：截断方案（`NoTruncation` / `truncdim` / `trunccutoff` /
+接口一致）：截断方案（`NoTruncation` / `truncdim` / `truncrelerr` /
 `truncdimcutoff`）、正交分解（`leftorth!` / `rightorth!`，算法 `QR` / `QRpos` /
 `LQ` / `LQpos` / `SVD` / `SDD` / `Polar`）、带截断 SVD（`tsvd!`）、`renyi_entropy`。
 

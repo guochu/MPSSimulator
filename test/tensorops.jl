@@ -18,7 +18,7 @@
 
     # 按相对误差截断
     ϵ = 1e-8
-    u3, s3, v3, err3 = tsvd(A, (1, 2), (3,); trunc=trunccutoff(ϵ=ϵ))
+    u3, s3, v3, err3 = tsvd(A, (1, 2), (3,); trunc=truncrelerr(ϵ=ϵ))
     @test all(s3 .> ϵ * s[1])
     @test err3 / s[1] <= ϵ + 1e-12
 
