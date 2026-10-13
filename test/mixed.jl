@@ -54,7 +54,7 @@
 
     # 保真度：ψ-ρ 与 VQC 一致
     sv = statevector(psi)
-    @test fidelity(rho, psi) ≈ VQC.fidelity(VQC.DensityMatrix(sv * sv'), VQC.StateVector(sv, n)) atol = 1e-8
+    @test fidelity(rho, psi) ≈ VQC.fidelity(VQC.DensityMatrix(sv * sv'), VQC.StateVector(sv, n))^2 atol = 1e-8
 
     # reset_qubit_zero!（混合态）
     r1 = densitymatrix(onehot_encoding_mps([1, 1]))

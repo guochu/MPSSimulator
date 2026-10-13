@@ -43,7 +43,7 @@
     @test dot(rho, rho2) ≈ tr(densitymatrix(rho) * densitymatrix(rho2)) atol = 1e-8
     rf = VQC.storage(ref)
     @test fidelity(rho, psi2) ≈ VQC.fidelity(VQC.DensityMatrix(rf * rf'),
-                                             VQC.StateVector(statevector(psi2), n)) atol = 1e-8
+                                             VQC.StateVector(statevector(psi2), n))^2 atol = 1e-8
 
     # 自旋算符（含非 Pauli 的 :P/:M 与同位多因子）：与 VQC 稠密展开对拍
     using QuantumCircuits.Hamiltonian: SpinOpTerm, SpinOpSum
