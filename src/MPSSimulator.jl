@@ -12,13 +12,13 @@ QuantumCircuits IR 的 **矩阵乘积态（MPS）模拟后端**（与态矢量�
 * **态层**（`src/states`）：纯态 `MPS`（局域维 2）与混合态 `DensityOperatorMPS`
   （局域维 4，融合指标 `p = i + 2j`）——两者都是
   `FiniteMPSAlgorithms.CanonicalMPS` 的**薄封装**：站点张量存储、键 Schmidt
-  谱、正则化（`canonicalize!`）、相邻交换（`swap!`）、两体门与线性代数
+  谱、正则化（`canonicalize!`）、相邻交换（`swap!`）与线性代数
   （`dot` / `norm` / `distance`）均复用 FiniteMPSAlgorithms 的现成实现；
 * **核心层**（`src/kernels` / `src/coreops` / `src/ops` / `src/expecs` /
   `src/initializers`）：局域矩阵 / Kraus 原语（`apply!` / `apply_kraus!`，
-  支持任意比特位置——非相邻位置自动经 SWAP 聚集；两体门直接走
-  FiniteMPSAlgorithms 的 `UnitaryGate` / `GeneralGate` 路径，本地内核只保留
-  比特轴重排、超算符映射、单比特门与 N ≥ 3 体块门）、测量 / 后选择 /
+  支持任意比特位置——非相邻位置自动经 SWAP 聚集；所有 N 体门（含 N = 2）
+  统一走本地 Hastings 块更新内核，本地内核还包含
+  比特轴重排与超算符映射）、测量 / 后选择 /
   偏迹、期望值、态初始化；**所有作用型接口均接受 `trunc` 关键字**
   （`TruncationScheme`，默认 `DefaultMPSTruncation`）；
 * **QuantumCircuits 桥接层**（`src/quantumcircuits`）：把 IR 指令
@@ -62,13 +62,14 @@ using QuantumCircuits.Interface: Backend
 
 # ── FiniteMPSAlgorithms：张量操作 / CanonicalMPS / 门 ───────────────────────
 using FiniteMPSAlgorithms
-using FiniteMPSAlgorithms: CanonicalMPS, Orthogonalize, UnitaryGate, GeneralGate,
+using FiniteMPSAlgorithms: CanonicalMPS, Orthogonalize,
                            prodmps, randommps, scaling, setscaling!,
                            QR, QRpos, LQ, LQpos, SVD, SDD, Polar
 # 扩展 FiniteMPSAlgorithms 的泛型函数（封装态的方法挂到同一函数上）
 import FiniteMPSAlgorithms: apply!, canonicalize!, expectation, fidelity,
                             distance, distance2, iscanonical, isrightcanonical,
-                            svectors_uninitialized, permute
+                            svectors_uninitialized, permute,
+                            bonddim, bonddims, phydim, phydims
 import LinearAlgebra: normalize!, norm, dot, tr
 
 # ── 张量操作层（re-export FiniteMPSAlgorithms）──────────────────────────────
@@ -100,7 +101,7 @@ export # 张量操作（FiniteMPSAlgorithms re-export）
     AbstractMPS, MPS, DensityOperatorMPS,
     zero_state_mps, rand_state_mps, qubit_encoding_mps, onehot_encoding_mps,
     amplitude_encoding_mps, statevector_mps, densitymatrix_mps, densitymatrix,
-    bond_dimensions, max_bond_dimension, physical_dimension, physical_dimensions,
+    bonddim, bonddims, phydim, phydims,
     iscanonical, isrightcanonical, svectors_uninitialized,
     # 核心操作
     apply, apply!, apply_kraus!, reset_qubit_zero!,

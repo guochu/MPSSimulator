@@ -52,9 +52,14 @@ function measure!(s::Union{MPS,DensityOperatorMPS}, q::Integer;
     n = length(s)
     1 <= q <= n || throw(ArgumentError("qubit index $q out of range [1, $n]"))
     p0, p1 = marginal_probabilities(s, q)
+    p0 = max(p0, 0.0)
+    p1 = max(p1, 0.0)                     # 截断误差可能产生 -1e-17 级负概率
     outcome = rand() * (p0 + p1) < p0 ? 0 : 1
     p = outcome == 0 ? p0 : p1
-    p > 0 || throw(ArgumentError("cannot collapse onto zero-probability outcome"))
+    if p <= 0                             # 采到数值零概率结局：取概率 ≈ 1 的另一结局
+        outcome = 1 - outcome
+        p = outcome == 0 ? p0 : p1
+    end
     if s isa MPS
         apply!(s, _projector(outcome, eltype(s)) ./ sqrt(p), (q,); trunc=trunc)
     else

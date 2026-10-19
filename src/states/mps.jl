@@ -128,23 +128,18 @@ _svec_eq(a::Missing, b) = false
 _svec_eq(a, b::Missing) = false
 _svec_eq(a, b) = a == b
 
-# ── 形状查询 ─────────────────────────────────────────────────────────────────
+# ── 形状查询（与 FiniteMPSAlgorithms 对齐：名字、语义与泛型方法一致）─────────
+# 封装态转发到 core（CanonicalMPS），phydim(psi, k) 直接走站点张量：
+#   bonddims(ψ)：内部键维数组（长度 L-1）  bonddim(ψ)：最大键维
+#   bonddim(ψ, b)：键 b 的维数            phydims(ψ)：各站点物理维数组
 
 "站点 `k` 的物理维（`MPS` 为 2、`DensityOperatorMPS` 为 4）。"
-physical_dimension(psi::AbstractMPS, k::Int) = size(psi[k], 2)
+phydim(psi::AbstractMPS, k::Int) = phydim(psi[k])
 
-"各站点物理维数组。"
-physical_dimensions(psi::AbstractMPS) = [size(A, 2) for A in psi.core.data]
-
-"""
-    bond_dimensions(psi) -> Vector{Int}
-
-键维数组（长度 `L+1`，含左右平凡边界）。
-"""
-bond_dimensions(psi::AbstractMPS) = Int[size(psi[1], 1); [size(A, 3) for A in psi.core.data]]
-
-"最大键维。"
-max_bond_dimension(psi::AbstractMPS) = maximum(bond_dimensions(psi))
+bonddim(psi::AbstractMPS, b::Int) = bonddim(psi.core, b)
+bonddims(psi::AbstractMPS) = bonddims(psi.core)
+bonddim(psi::AbstractMPS) = bonddim(psi.core)
+phydims(psi::AbstractMPS) = phydims(psi.core)
 
 "`svectors` 是否未初始化（未知正则信息）。"
 svectors_uninitialized(psi::AbstractMPS) = svectors_uninitialized(psi.core)

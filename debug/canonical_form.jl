@@ -63,7 +63,7 @@ function check_canonical_sweep(state, ops; label)
         ok = iscanonical(state)
         push!(flags, ok)
         println("  [$label] gate $k/$(length(ops)): iscanonical = $ok",
-                "  (键维 = ", max_bond_dimension(state), ")")
+                "  (键维 = ", bonddim(state), ")")
     end
     return flags
 end

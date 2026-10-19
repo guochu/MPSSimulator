@@ -46,10 +46,10 @@ densitymatrix(psi::MPS; trunc=DefaultMPSTruncation)
 ## 查询与规范型
 
 ```@docs
-physical_dimension
-physical_dimensions
-bond_dimensions
-max_bond_dimension
+phydim
+phydims
+bonddim
+bonddims
 svectors_uninitialized
 isrightcanonical
 iscanonical

@@ -7,10 +7,8 @@
 # 与 FiniteMPSAlgorithms 的分工：
 #   * 相邻内容交换（SWAP 聚集）直接复用 `FiniteMPSAlgorithms.swap!`
 #     （Hastings 式交换，任意物理维，正则形式保持）；
-#   * 两体门复用 `FiniteMPSAlgorithms.apply!`（`UnitaryGate` / `GeneralGate`，
-#     Hastings 更新 + 非相邻自动交换，见 `coreops.jl`）；
-#   * 这里只保留线路约定相关的原语：比特轴重排、超算符映射、
-#     单比特门与 N ≥ 3 体相邻块门的 Hastings 更新。
+#   * 其余门作用原语（单比特门、任意 N 体门的 Hastings 块更新、
+#     比特轴重排、超算符映射）全部为本地实现，见 `coreops.jl`。
 #
 # Hastings 更新（相邻块 [a, a+N-1] 上的 N 体门）：
 #   1. 把块内站点收缩为未加权块张量 B（Dl, d^N, Dr），门作用在物理轴上；
@@ -101,7 +99,7 @@ end
 """
     _apply_gate_block!(psi, G, a, N, trunc) -> Float64
 
-把 `N` 体门 `G`（站点升序、site `a` 为矩阵最高位）作用到相邻块
+把 `N` 体门 `G`（站点升序布局、site `a` 为物理索引最低位）作用到相邻块
 `a … a+N-1` 上（就地，Hastings 式更新），返回最大单键截断误差。
 要求 `psi` 的键谱已初始化（`N ≥ 2` 时需要键 `a` 的谱作预条件子）。
 """

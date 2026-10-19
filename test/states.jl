@@ -17,7 +17,7 @@
     @test statevector(amplitude_encoding_mps(v)) ≈ VQC.storage(VQC.amplitude_encoding(v))
     # 截断振幅编码：键维受限
     vt = amplitude_encoding_mps(v; trunc=truncdim(D=2))
-    @test max_bond_dimension(vt) <= 2
+    @test bonddim(vt) <= 2
 
     # 随机态：归一化、右正则
     r = rand_state_mps(5; D=4)

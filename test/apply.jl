@@ -101,7 +101,7 @@
 
     # 截断：键维封顶 + 近似保真
     trunced = simulate(cvar, zero_state_mps(4); trunc=truncdim(D=2))
-    @test max_bond_dimension(trunced) <= 2
+    @test bonddim(trunced) <= 2
     @test fidelity(trunced, exact) > 0.99
 
     # 截断误差可控：TruncateDim(1) 会丢弃纠缠 → 保真度明显下降

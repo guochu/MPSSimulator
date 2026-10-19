@@ -128,7 +128,7 @@ rs.counts                                     # Dict{String,Int}，键如 "c:00"
 
 **态与初始化**（`zero_state_mps` / `onehot_encoding_mps` / `qubit_encoding_mps` /
 `amplitude_encoding_mps` / `rand_state_mps` / `densitymatrix_mps`）；
-查询（`bond_dimensions` / `max_bond_dimension` / `site_dimension` /
+查询（`bonddim` / `bonddims` / `phydim` / `phydims` /
 `iscanonical` / `isrightcanonical`）。
 
 **核心操作**（均带 `trunc` 关键字）：

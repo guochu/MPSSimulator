@@ -37,7 +37,7 @@ using QuantumCircuits, MPSSimulator
 c = Circuit(4)
 push!(c, CZ(1, 4))                 # 非相邻两比特门
 ψ = simulate(c, zero_state_mps(4); trunc = truncdim(16))
-println("bond dimensions = ", bond_dimensions(ψ))
+println("bond dimensions = ", bonddims(ψ))
 ```
 
 ## 噪声与混合态
