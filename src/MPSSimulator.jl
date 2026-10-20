@@ -51,7 +51,6 @@ module MPSSimulator
 using LinearAlgebra
 using Random
 using TensorOperations
-using MatrixAlgebraKit: isunitary
 
 using QuantumCircuits
 using QuantumCircuits: GateOp, ChannelOp, MeasOp, ResetOp, BarrierOp, IfOp, BlockOp,
