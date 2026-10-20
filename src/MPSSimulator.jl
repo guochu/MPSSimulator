@@ -55,6 +55,7 @@ using TensorOperations
 using QuantumCircuits
 using QuantumCircuits: GateOp, ChannelOp, MeasOp, ResetOp, BarrierOp, IfOp, BlockOp,
                        Operation, Circuit, Cond, Param, ClbitRef, CReg, ParamVector,
+                       ClassicalStore, reg_value, set_clbit!,
                        qubits, mat, kraus, parameters, unroll
 import QuantumCircuits: nqubits, measure
 using QuantumCircuits.Interface: Backend
@@ -110,6 +111,6 @@ export # 张量操作（FiniteMPSAlgorithms re-export）
     # QuantumCircuits.Interface 再导出
     simulate, simulate!,
     # QuantumCircuits 桥接层
-    ClassicalStore, MatrixProductBackend
+    MatrixProductBackend
 
 end # module

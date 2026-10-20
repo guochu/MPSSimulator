@@ -130,7 +130,7 @@ function _apply_with_store!(s, op::MeasOp, store::ClassicalStore, env::_ParamEnv
                             trunc::TruncationScheme)
     for (q, cb) in zip(op.qubits, op.clbits)
         outcome = measure!(s, q; trunc=trunc)
-        _set_clbit!(store, cb, outcome)
+        set_clbit!(store, cb, outcome)
     end
     return s
 end

@@ -1,43 +1,10 @@
-# classical.jl — 经典寄存器运行时 + IfOp（与 VQC 扩展层一致）
+# classical.jl — IfOp 执行（经典寄存器运行时已上移至 QuantumCircuits）
+#
+# ClassicalStore / reg_value / set_clbit! / eval_cond 由
+# QuantumCircuits 统一提供（2026-10 上移，三后端共享）；本文件只保留
+# MPS 态上的 IfOp 分支执行与 QuantumCircuits 协议扩展。
 
-"""
-模拟期的经典寄存器状态（`CReg` → 整数值，位序与 `ClbitRef.index` 一致）。
-"""
-mutable struct ClassicalStore
-    regs::Vector{CReg}
-    values::Vector{Int}
-end
-
-ClassicalStore(c::Circuit) = ClassicalStore(copy(c.cregs), zeros(Int, length(c.cregs)))
-
-function _reg_index(store::ClassicalStore, r::CReg)
-    idx = findfirst(==(r), store.regs)
-    idx === nothing && throw(ArgumentError("register $(r.name) is not part of this simulation"))
-    return idx
-end
-
-_reg_value(store::ClassicalStore, r::CReg) = store.values[_reg_index(store, r)]
-
-function _set_clbit!(store::ClassicalStore, cb::ClbitRef, b::Int)
-    idx = _reg_index(store, cb.reg)
-    if b == 0
-        store.values[idx] &= ~(1 << (cb.index - 1))
-    else
-        store.values[idx] |= 1 << (cb.index - 1)
-    end
-    return store
-end
-
-function _eval_cond(cond::Cond, store::ClassicalStore)
-    v = _reg_value(store, cond.reg)
-    v = cond.bit === nothing ? v : (v >> (cond.bit - 1)) & 1
-    op = cond.op
-    return op === :(==) ? v == cond.value :
-           op === :(≠) ? v != cond.value :
-           op === :(≥) ? v >= cond.value :
-           op === :(≤) ? v <= cond.value :
-           throw(ArgumentError("unsupported condition operator $(op)"))
-end
+using QuantumCircuits: eval_cond
 
 """
     apply!(state, op::IfOp, store::ClassicalStore; trunc=DefaultMPSTruncation) -> state
@@ -48,7 +15,7 @@ end
 function apply!(s::Union{MPS,DensityOperatorMPS}, op::IfOp, store::ClassicalStore,
                 table::Union{Nothing,AbstractDict}=nothing;
                 trunc::TruncationScheme=DefaultMPSTruncation)
-    branch = _eval_cond(op.cond, store) ? op.then : op.otherwise
+    branch = eval_cond(op.cond, store) ? op.then : op.otherwise
     branch === nothing && return s
     for o in branch.ops
         s = apply!(s, o, table; trunc=trunc)
@@ -70,7 +37,7 @@ nqubits(x::DensityOperatorMPS) = length(x)
 
 """
     measure(s::Union{MPS,DensityOperatorMPS}, q::Integer; trunc=DefaultMPSTruncation)
-        -> (s', outcome, p)
+    -> (s', outcome, p)
 
 QuantumCircuits `measure` 协议的态方法：非就地测量，返回坍缩后的
 新态、结果与概率。
