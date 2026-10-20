@@ -22,7 +22,7 @@ QuantumCircuits IR 的 **矩阵乘积态（MPS）模拟后端**（与态矢量�
   偏迹、期望值、态初始化；**所有作用型接口均接受 `trunc` 关键字**
   （`TruncationScheme`，默认 `DefaultMPSTruncation`）；
 * **QuantumCircuits 桥接层**（`src/quantumcircuits`）：把 IR 指令
-  （`GateOp` / `ChannelOp` / `MeasOp` / `ReinitOp` / `BarrierOp` / `IfOp` /
+  （`GateOp` / `ChannelOp` / `MeasOp` / `ResetOp` / `BarrierOp` / `IfOp` /
   `BlockOp`）与 Pauli 代数桥接到核心原语，提供 `simulate` / 经典寄存器
   运行时 / `nqubits` 与 `measure` 协议扩展，以及
   Interface 后端 `MatrixProductBackend`
@@ -54,7 +54,7 @@ using TensorOperations
 using MatrixAlgebraKit: isunitary
 
 using QuantumCircuits
-using QuantumCircuits: GateOp, ChannelOp, MeasOp, ReinitOp, BarrierOp, IfOp, BlockOp,
+using QuantumCircuits: GateOp, ChannelOp, MeasOp, ResetOp, BarrierOp, IfOp, BlockOp,
                        Operation, Circuit, Cond, Param, ClbitRef, CReg, ParamVector,
                        qubits, mat, kraus, parameters, unroll
 import QuantumCircuits: nqubits, measure

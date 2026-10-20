@@ -52,10 +52,10 @@
     push!(cb2, QuantumCircuits.block(Circuit([X(1)]; n=1); at=[1], repeat=2))
     @test statevector(simulate(cb2, zero_state_mps(2))) ≈ statevector(zero_state_mps(2)) atol = 1e-12
 
-    # ── ReinitOp / BarrierOp ──
+    # ── ResetOp / BarrierOp ──
     cr = Circuit(2)
     push!(cr, X(2))
-    push!(cr, QuantumCircuits.reinit(2))
+    push!(cr, QuantumCircuits.reset(2))
     @test statevector(simulate(cr, zero_state_mps(2))) ≈ statevector(zero_state_mps(2)) atol = 1e-12
 
     cbar = Circuit(2)

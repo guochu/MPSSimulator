@@ -17,7 +17,7 @@ end
 把 IR 指令 `op` 就地作用到 MPS 态上，返回（可能被提升类型的）态。
 
 支持：`GateOp`（酉门）、`ChannelOp`（噪声信道，纯态自动提升为
-`DensityOperatorMPS`）、`MeasOp`（坍缩，测量结果丢弃）、`ReinitOp`、
+`DensityOperatorMPS`）、`MeasOp`（坍缩，测量结果丢弃）、`ResetOp`、
 `BarrierOp`（无操作）、`BlockOp`（展开执行）。`IfOp` 需要经典寄存器
 状态，请通过 `simulate` 执行。
 
@@ -50,14 +50,14 @@ function apply!(s::Union{MPS,DensityOperatorMPS}, op::ChannelOp,
     return apply_kraus!(s, kraus(op.channel), Tuple(qs); trunc=trunc)
 end
 
-# ── ReinitOp / BarrierOp / MeasOp ────────────────────────────────────────────
+# ── ResetOp / BarrierOp / MeasOp ────────────────────────────────────────────
 
 """
-    apply!(state, op::ReinitOp; trunc=DefaultMPSTruncation) -> state
+    apply!(state, op::ResetOp; trunc=DefaultMPSTruncation) -> state
 
 把 `op.qubits` 中的每个比特相干重置到 `|0⟩`。
 """
-function apply!(s::Union{MPS,DensityOperatorMPS}, op::ReinitOp,
+function apply!(s::Union{MPS,DensityOperatorMPS}, op::ResetOp,
                 table::Union{Nothing,AbstractDict}=nothing;
                 trunc::TruncationScheme=DefaultMPSTruncation)
     n = length(s)
